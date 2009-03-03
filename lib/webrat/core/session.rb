@@ -49,6 +49,7 @@ For example:
     include Logging
     include SaveAndOpenPage
     attr_reader :current_url
+    attr_accessor :default_host
     attr_reader :elements
 
     def initialize(context = nil) #:nodoc:
@@ -264,11 +265,11 @@ For example:
     end
 
     def current_host
-      URI.parse(current_url).host || "www.example.com"
+      URI.parse(current_url).host || default_host || "www.example.com"
     end
 
     def response_location_host
-      URI.parse(response_location).host || "www.example.com"
+      URI.parse(response_location).host || default_host || "www.example.com"
     end
 
     def reset
