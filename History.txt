@@ -1,14 +1,46 @@
-== Git (Unreleased)
+== 0.4.5 / ?
 
 * Minor enhancements
 
+  * Added support for field_labeled_locators ending in non word characters
+    lh 148 (Zach Dennis)
+  * Filled in tests on click link lh 195 (diabolo)
+
+== 0.4.4 / 2009-04-06
+
+* Major enhancements
+
+  * Make selenium process management code more robust and informative
+  
+* Minor enhancements
+  
+  * Add support for Rails javascript post links (Mark Menard)
+  * Upgrade selenium-client dependency to 1.2.14, and update for new waiting
+    API (Balint Erdi)
+  * Change default app environment from "selenium" to "test"
+
+* Bug fixes
+
+  * Don't create a new instance of WWW::Mechanize for each request
+    (Mark Menard)
+  * Select fields with duplicate selected options sent an incorrect value (Noah Davis)
+  
+== 0.4.3 / 2009-03-17
+
+* Minor enhancements
+
+  * Support Rails 2.3. Use Rack::Utils to parse params (Matthew Ford)
+  * Support for "modular" Sinatra app style (Simon Rozet)
+  * Initial Merb and Sinatra compatibility for Selenium mode (Corey Donohoe)
   * When faced with a label with no for attribute, that contains a hidden field
     and another field, as can be the case in Rails 2.3's checkbox view,
     webrat now locates the non-hidden field. (Luke Melia) 
-  * When using Rails 2.3, use Rack::Utils to parse params (Matthew Ford)
-  * Initial Merb and Sinatra compatibility for Selenium mode (Corey Donohoe)
   * Add application_framework config for Selenium mode to determine how to
     start and stop the app server (Corey Donohoe)
+
+* Bug fixes
+
+  * Fix following of absolute redirect URL in Sinatra (Simon Rozet)
 
 == 0.4.2 / 2009-02-24
 

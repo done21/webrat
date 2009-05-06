@@ -19,12 +19,12 @@ describe "select_date" do
       </form>
       </html>
     HTML
-    webrat_session.should_receive(:post).with("/appointments", 
+    webrat_session.should_receive(:post).with("/appointments",
       "appointment" => {"date(1i)" => '2003', "date(2i)" => "12", "date(3i)" => "25"})
     select_date "December 25, 2003", :from => "Date"
     click_button
   end
-  
+
   it "should accept a date object" do
     with_html <<-HTML
       <html>
@@ -43,7 +43,7 @@ describe "select_date" do
       </form>
       </html>
     HTML
-    webrat_session.should_receive(:post).with("/appointments", 
+    webrat_session.should_receive(:post).with("/appointments",
       "appointment" => {"date(1i)" => '2003', "date(2i)" => "12", "date(3i)" => "25"})
     select_date Date.parse("December 25, 2003"), :from => "date"
     click_button
@@ -66,9 +66,33 @@ describe "select_date" do
       </form>
       </html>
     HTML
-    webrat_session.should_receive(:post).with("/appointments", 
+    webrat_session.should_receive(:post).with("/appointments",
       "appointment" => {"date(1i)" => '2003', "date(2i)" => "12", "date(3i)" => "25"})
     select_date "December 25, 2003"
+    click_button
+  end
+  
+  it "should work when the label ends in a non word character" do
+    with_html <<-HTML
+      <html>
+      <form action="/appointments" method="post">
+        <label for="appointment_date">date ?</label><br />
+        <select id="appointment_date_1i" name="appointment[date(1i)]">
+          <option value="2003">2003</option>
+        </select>
+        <select id="appointment_date_2i" name="appointment[date(2i)]">
+          <option value="12">December</option>
+        </select>
+        <select id="appointment_date_3i" name="appointment[date(3i)]">
+          <option value="25">25</option>
+        </select>
+        <input type="submit" />
+      </form>
+      </html>
+    HTML
+      webrat_session.should_receive(:post).with("/appointments",
+      "appointment" => {"date(1i)" => '2003', "date(2i)" => "12", "date(3i)" => "25"})
+    select_date Date.parse("December 25, 2003"), :from => "date ?"
     click_button
   end
 
@@ -81,7 +105,7 @@ describe "select_date" do
       </form>
       </html>
     HTML
-    
+
     lambda { select_date "December 25, 2003", :from => "date" }.should raise_error(Webrat::NotFoundError)
   end
 

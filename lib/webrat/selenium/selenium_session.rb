@@ -1,4 +1,6 @@
 require "webrat/core/save_and_open_page"
+require "webrat/selenium/selenium_rc_server"
+require "webrat/selenium/application_server"
 
 module Webrat
   class TimeoutError < WebratError
@@ -39,7 +41,7 @@ module Webrat
 
     def fill_in(field_identifier, options)
       locator = "webrat=#{Regexp.escape(field_identifier)}"
-      selenium.wait_for_element locator, 5
+      selenium.wait_for_element locator, :timeout_in_seconds => 5
       selenium.type(locator, "#{options[:with]}")
     end
 
@@ -62,7 +64,7 @@ module Webrat
       pattern ||= '*'
       locator = "button=#{pattern}"
 
-      selenium.wait_for_element locator, 5
+      selenium.wait_for_element locator, :timeout_in_seconds => 5
       selenium.click locator
     end
 
@@ -71,7 +73,7 @@ module Webrat
     def click_link(link_text_or_regexp, options = {})
       pattern = adjust_if_regexp(link_text_or_regexp)
       locator = "webratlink=#{pattern}"
-      selenium.wait_for_element locator, 5
+      selenium.wait_for_element locator, :timeout_in_seconds => 5
       selenium.click locator
     end
 
@@ -79,7 +81,7 @@ module Webrat
 
     def click_link_within(selector, link_text, options = {})
       locator = "webratlinkwithin=#{selector}|#{link_text}"
-      selenium.wait_for_element locator, 5
+      selenium.wait_for_element locator, :timeout_in_seconds => 5
       selenium.click locator
     end
 
@@ -94,7 +96,7 @@ module Webrat
         select_locator = "webratselectwithoption=#{option_text}"
       end
 
-      selenium.wait_for_element select_locator, 5
+      selenium.wait_for_element select_locator, :timeout_in_seconds => 5
       selenium.select(select_locator, option_text)
     end
 
@@ -102,7 +104,7 @@ module Webrat
 
     def choose(label_text)
       locator = "webrat=#{label_text}"
-      selenium.wait_for_element locator, 5
+      selenium.wait_for_element locator, :timeout_in_seconds => 5
       selenium.click locator
     end
 
@@ -110,7 +112,7 @@ module Webrat
 
     def check(label_text)
       locator = "webrat=#{label_text}"
-      selenium.wait_for_element locator, 5
+      selenium.wait_for_element locator, :timeout_in_seconds => 5
       selenium.click locator
     end
     alias_method :uncheck, :check
@@ -179,6 +181,7 @@ module Webrat
     end
 
   protected
+
     def silence_stream(stream)
       old_stream = stream.dup
       stream.reopen(RUBY_PLATFORM =~ /mswin/ ? 'NUL:' : '/dev/null')
@@ -189,16 +192,11 @@ module Webrat
     end
 
     def setup #:nodoc:
-      silence_stream(STDOUT) do
-        silence_stream(STDERR) do
-          Webrat.start_selenium_server
-          Webrat.start_app_server
-        end
-      end
+      Webrat::Selenium::SeleniumRCServer.boot
+      Webrat::Selenium::ApplicationServer.boot
 
       create_browser
       $browser.start
-      teardown_at_exit
 
       extend_selenium
       define_location_strategies
@@ -210,14 +208,10 @@ module Webrat
       $browser = ::Selenium::Client::Driver.new(Webrat.configuration.selenium_server_address || "localhost",
           Webrat.configuration.selenium_server_port, Webrat.configuration.selenium_browser_key, "http://#{Webrat.configuration.application_address}:#{Webrat.configuration.application_port}")
       $browser.set_speed(0) unless Webrat.configuration.selenium_server_address
-    end
 
-    def teardown_at_exit #:nodoc:
       at_exit do
         silence_stream(STDOUT) do
           $browser.stop
-          Webrat.stop_app_server
-          Webrat.stop_selenium_server
         end
       end
     end

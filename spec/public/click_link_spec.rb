@@ -101,6 +101,27 @@ describe "click_link" do
     webrat_session.should_receive(:get).with("/page", {})
     click_link /_text_/
   end
+  
+  it "should click links by title" do
+    with_html <<-HTML
+      <html>
+      <a title="piddle" href="/page">Link text</a>
+      </html>
+    HTML
+    webrat_session.should_receive(:get).with("/page", {})
+    click_link 'piddle'
+  end
+  
+  it "should click links by title regex" do
+    with_html <<-HTML
+      <html>
+      <a title="piddlediddle" href="/page">Link text</a>
+      </html>
+    HTML
+    webrat_session.should_receive(:get).with("/page", {})
+    click_link /iddle/
+  end
+  
 
   it "should click rails javascript links with authenticity tokens" do
     with_html <<-HTML
@@ -174,6 +195,27 @@ describe "click_link" do
     HTML
     webrat_session.should_receive(:get).with("/posts", {})
     click_link "Posts", :javascript => false
+  end
+
+  it "should click rails javascript post links" do
+    with_html <<-HTML
+      <html>
+      <a href="/posts" onclick="var f = document.createElement('form');
+        f.style.display = 'none';
+        this.parentNode.appendChild(f);
+        f.method = 'POST';
+        f.action = this.href;
+        var m = document.createElement('input');
+        m.setAttribute('type', 'hidden');
+        m.setAttribute('name', '_method');
+        m.setAttribute('value', 'post');
+        f.appendChild(m);
+        f.submit();
+        return false;">Post</a></h2>
+      </html>
+    HTML
+    webrat_session.should_receive(:post).with("/posts", {})
+    click_link "Post"
   end
 
   it "should click rails javascript put links" do
